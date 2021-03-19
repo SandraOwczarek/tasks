@@ -6,13 +6,8 @@ import lombok.AllArgsConstructor;
 
 @Getter
 @AllArgsConstructor
-
 public class TaskDto {
-    private Long id;
+    private long id;
     private String title;
     private String content;
-
-    public TaskDto() {
-
-    }
 }
