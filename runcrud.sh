@@ -26,6 +26,7 @@ rename() {
 
 copy_file() {
    if cp build/libs/crud.war $CATALINA_HOME/webapps; then
+     chmod 777 $CATALINA_HOME/webapps/crud.war
       start_tomcat
    else
       fail
