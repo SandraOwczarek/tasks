@@ -27,6 +27,7 @@ public class TrelloController {
     @GetMapping(value = "getTrelloBoardsContainsIdAndName")
     public void getTrelloBoardsContainsIdAndName() {
         List<TrelloBoardDto> trelloBoards = trelloClient.getTrelloBoards();
-        trelloBoards.stream().filter(e -> e.getName() != null && e.getId() != null && e.getName().contains("Kodilla")).forEach(e -> System.out.println(e.getId() + " " + e.getName()));
+        trelloBoards.stream().filter(e -> e.getName() != null && e.getId() != null &&
+                e.getName().contains("Kodilla")).forEach(e -> System.out.println(e.getId() + " " + e.getName()));
     }
 }

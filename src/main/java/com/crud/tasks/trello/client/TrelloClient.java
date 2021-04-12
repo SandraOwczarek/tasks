@@ -1,16 +1,20 @@
 package com.crud.tasks.trello.client;
 
 import com.crud.tasks.domain.TrelloBoardDto;
+import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
+
 import java.net.URI;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-        @Component
+import java.util.*;
+import java.util.stream.Collectors;
         public class TrelloClient {
 
             @Value("${trello.api.endpoint.prod}")
@@ -24,6 +28,7 @@ import java.util.List;
 
             @Value("${trello.app.username}")
             private String trelloAppUsername;
+
             private RestTemplate restTemplate;
 
             @Autowired
