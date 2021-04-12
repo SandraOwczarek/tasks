@@ -5,7 +5,8 @@ import com.crud.tasks.trello.client.TrelloClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 
-
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class TrelloController {
@@ -18,10 +19,12 @@ public class TrelloController {
     }
     @GetMapping(value = "getTrelloBoards")
     public void getTrelloBoards() {
-
         List<TrelloBoardDto> trelloBoards = trelloClient.getTrelloBoards();
-
         trelloBoards.forEach(trelloBoardDto -> System.out.println(trelloBoardDto.getId() + " " + trelloBoardDto.getName()));
+        /* Optional<TrelloBoardDto[]> boardsResponse = Optional.ofNullable(restTemplate.getForObject(url,TrelloBoardDto[].class));
+        return Arrays.asList(boardsResponse.orElse(new TrelloBoardDto[0]));
+        if (isNotEmpty) {
+        return new ArrayList<>(); */
     }
 
     @GetMapping(value = "getTrelloBoardsContainsIdAndName")
