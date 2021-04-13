@@ -1,54 +1,74 @@
 package com.crud.tasks.trello.client;
 
+import com.crud.tasks.domain.CreatedTrelloCardDto;
 import com.crud.tasks.domain.TrelloBoardDto;
+import com.crud.tasks.domain.TrelloCardDto;
+import com.crud.tasks.trello.config.TrelloConfig;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
-import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
 import java.util.*;
 import java.util.stream.Collectors;
-        public class TrelloClient {
 
-            @Value("${trello.api.endpoint.prod}")
-            private String trelloApiEndpoint;
+@Component
+@RequiredArgsConstructor
+public class TrelloClient {
 
-            @Value("${trello.app.key}")
-            private String trelloAppKey;
+    private static final Logger LOGGER = LoggerFactory.getLogger(TrelloClient.class);
 
-            @Value("${trello.app.token}")
-            private String trelloAppToken;
+    private final RestTemplate restTemplate;
+    private final TrelloConfig trelloConfig;
 
-            @Value("${trello.app.username}")
-            private String trelloAppUsername;
+    private URI boardsUrl() {
+        return UriComponentsBuilder.fromHttpUrl(trelloConfig.getTrelloApiEndpoint() + "/members/" + trelloConfig.getTrelloUser() + "/boards")
+                .queryParam("fields", "name,id")
+                .queryParam("lists", "all")
+                .queryParam("key", trelloConfig.getTrelloAppKey())
+                .queryParam("token", trelloConfig.getTrelloToken())
+                .build().encode().toUri();
+    }
 
-            private RestTemplate restTemplate;
+    private URI cardUrl(String name, String desc, String pos, String idList) {
+        return UriComponentsBuilder.fromHttpUrl(trelloConfig.getTrelloApiEndpoint() + "/cards")
+                .queryParam("key", trelloConfig.getTrelloAppKey())
+                .queryParam("token", trelloConfig.getTrelloToken())
+                .queryParam("name", name)
+                .queryParam("desc", desc)
+                .queryParam("pos", pos)
+                .queryParam("idList", idList)
+                .build()
+                .encode()
+                .toUri();
+    }
 
-            @Autowired
-            public void setRestTemplate(RestTemplate restTemplate) {
-                this.restTemplate = restTemplate;
-            }
-            public List<TrelloBoardDto> getTrelloBoards() {
-                URI url = getUrl();
-                TrelloBoardDto[] boardsResponse = restTemplate.getForObject(url, TrelloBoardDto[].class);
-                boolean isNotEmpty = Arrays.stream(boardsResponse).findAny().isPresent();
-                if (isNotEmpty) {
-                    return Arrays.asList(boardsResponse);
-                }
-                return new ArrayList<>();
-            }
+    public List<TrelloBoardDto> getTrelloBoards() {
 
-            private URI getUrl() {
-                return UriComponentsBuilder.fromHttpUrl(trelloApiEndpoint + "/members/" + trelloAppUsername + "/boards")
-                        .queryParam("key", trelloAppKey)
-                        .queryParam("token", trelloAppToken)
-                        .queryParam("fields", "name,id").build().encode().toUri();
-            }
+        try {
+            TrelloBoardDto[] boardsResponse = restTemplate.getForObject(boardsUrl(), TrelloBoardDto[].class);
+            return Optional.ofNullable(boardsResponse)
+                    .map(Arrays::asList)
+                    .orElse(Collections.emptyList())
+                    .stream()
+                    .filter(p -> Objects.nonNull(p.getId()) && Objects.nonNull(p.getName())) //.filter(p -> p.getName().contains("Kodilla"))
+                    .collect(Collectors.toList());
+        } catch (RestClientException e) {
+            LOGGER.error(e.getMessage(), e);
+            return Collections.emptyList();
         }
+
+    }
+
+    public CreatedTrelloCardDto createNewCard(TrelloCardDto trelloCardDto) {
+
+        return restTemplate.postForObject(cardUrl(trelloCardDto.getName(),
+                trelloCardDto.getDescription(), trelloCardDto.getPos(),
+                trelloCardDto.getListId()), null, CreatedTrelloCardDto.class);
+    }
+
+}

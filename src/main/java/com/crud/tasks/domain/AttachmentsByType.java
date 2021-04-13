@@ -5,12 +5,12 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
+
 
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
-public class AttachmentByType {
+public class AttachmentsByType {
     @JsonProperty("trello")
     private Trello trello;
 }
