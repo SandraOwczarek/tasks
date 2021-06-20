@@ -1,5 +1,6 @@
 package com.crud.tasks.controller;
 
+
 import com.crud.tasks.domain.CreatedTrelloCardDto;
 import com.crud.tasks.domain.TrelloBoardDto;
 import com.crud.tasks.domain.TrelloCardDto;
@@ -19,14 +20,13 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyObject;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringJUnitWebConfig
-@WebMvcTest(TrelloControler.class)
-class TrelloControlerTest {
+@WebMvcTest(TrelloController.class)
+class TrelloControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
@@ -36,16 +36,17 @@ class TrelloControlerTest {
 
     @Test
     void shouldFetchEmptyTrelloBoards() throws Exception {
-        //Given
+        // Given
         when(trelloFacade.fetchTrelloBoards()).thenReturn(List.of());
 
-        //When&Then
+        //When & Then
         mockMvc
                 .perform(MockMvcRequestBuilders
-                        .get("/v1/trello/getTrelloBoards")
+                        .get("/v1/trello/boards")
                         .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(MockMvcResultMatchers.status().is(200)) // or isOk()
+                .andExpect(status().is(200))
                 .andExpect(MockMvcResultMatchers.jsonPath("$", Matchers.hasSize(0)));
+
     }
 
     @Test
@@ -53,17 +54,19 @@ class TrelloControlerTest {
         // Given
         List<TrelloListDto> trelloLists = List.of(new TrelloListDto("1", "Test list", false));
         List<TrelloBoardDto> trelloBoards = List.of(new TrelloBoardDto("1", "Test Task", trelloLists));
+
         when(trelloFacade.fetchTrelloBoards()).thenReturn(trelloBoards);
+
         //When & Then
         mockMvc
                 .perform(MockMvcRequestBuilders
-                        .get("/v1/trello/getTrelloBoards")
+                        .get("/v1/trello/boards")
                         .contentType(MediaType.APPLICATION_JSON))
-                //Trello Boards Field
+                // Trello board fields
                 .andExpect(MockMvcResultMatchers.jsonPath("$", Matchers.hasSize(1)))
                 .andExpect(MockMvcResultMatchers.jsonPath("$[0].id", Matchers.is("1")))
                 .andExpect(MockMvcResultMatchers.jsonPath("$[0].name", Matchers.is("Test Task")))
-                //Trello List Fields
+                // Trello list fields
                 .andExpect(MockMvcResultMatchers.jsonPath("$[0].lists", Matchers.hasSize(1)))
                 .andExpect(MockMvcResultMatchers.jsonPath("$[0].lists[0].id", Matchers.is("1")))
                 .andExpect(MockMvcResultMatchers.jsonPath("$[0].lists[0].name", Matchers.is("Test list")))
@@ -84,13 +87,15 @@ class TrelloControlerTest {
         String jsonContent = gson.toJson(trelloCardDto);
 
         //When & Then
-        mockMvc.perform(MockMvcRequestBuilders
-                .post("/v1/trello/createTrelloCard")
-                .contentType(MediaType.APPLICATION_JSON)
-                .characterEncoding("UTF-8")
-                .content(jsonContent))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.id", Matchers.is(createdTrelloCardDto.getId())))
+        mockMvc
+                .perform(MockMvcRequestBuilders
+                        .post("/v1/trello/cards")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .characterEncoding("UTF-8")
+                        .content(jsonContent))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.id", Matchers.is("232")))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.name", Matchers.is("Test")))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.shortUrl", Matchers.is(createdTrelloCardDto.getShortUrl())));
+                .andExpect(MockMvcResultMatchers.jsonPath("$.shortUrl", Matchers.is("http://test.com")));
+
     }
 }

@@ -1,6 +1,4 @@
 package com.crud.tasks.controller;
-
-
 import com.crud.tasks.domain.CreatedTrelloCardDto;
 import com.crud.tasks.domain.TrelloBoardDto;
 import com.crud.tasks.domain.TrelloCardDto;
@@ -16,17 +14,17 @@ import java.util.List;
 @RestController
 @RequestMapping("/v1/trello")
 @RequiredArgsConstructor
-public class TrelloControler {
+class TrelloController {
 
     @Autowired
-    private TrelloFacade trelloFacade;
+    private final TrelloFacade trelloFacade;
 
-    @GetMapping("getTrelloBoards")
+    @GetMapping("/boards")
     public List<TrelloBoardDto> getTrelloBoards() {
         return trelloFacade.fetchTrelloBoards();
     }
 
-    @PostMapping("createTrelloCard")
+    @PostMapping("/cards")
     public CreatedTrelloCardDto createTrelloCard(@RequestBody TrelloCardDto trelloCardDto) {
         return trelloFacade.createCard(trelloCardDto);
     }
